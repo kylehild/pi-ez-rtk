@@ -1,7 +1,7 @@
 {
   "name": "pi-ez-rtk",
-  "version": "0.1.0",
-  "description": "Pi extension that rewrites bash commands through rtk without overriding the bash tool.",
+  "version": "0.2.0",
+  "description": "Pi package that adds a bash_rtk tool which rewrites commands through rtk before execution.",
   "type": "module",
   "keywords": ["pi-package", "pi", "rtk", "bash"],
   "author": "Kyle Hildebrandt",

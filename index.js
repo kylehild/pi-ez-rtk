@@ -1,4 +1,4 @@
-import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
+import { createBashTool } from "@mariozechner/pi-coding-agent";
 import { spawnSync } from "node:child_process";
 
 const REWRITE_TIMEOUT_MS = 5000;
@@ -13,46 +13,28 @@ function rtkRewriteCommand(command) {
   if (result.error) return undefined;
 
   const rewritten = (result.stdout ?? "").trimEnd();
-  if (!RTK_REWRITE_FOUND_CODES.has(result.status) || !rewritten) {
-    return undefined;
-  }
-
+  if (!RTK_REWRITE_FOUND_CODES.has(result.status) || !rewritten) return undefined;
   return rewritten;
 }
 
-function rewriteWholeLineBashInput(text) {
-  const match = text.match(/^(\s*)(!!?)([\s\S]*)$/);
-  if (!match) return undefined;
-
-  const [, leading, prefix, commandPart] = match;
-  if (prefix === "!!") return undefined;
-
-  const rewritten = rtkRewriteCommand(commandPart);
-  if (!rewritten) return undefined;
-
-  return `${leading}!${rewritten}`;
-}
-
 export default function (pi) {
-  pi.on("tool_call", (event) => {
-    if (!isToolCallEventType("bash", event)) return;
-
-    const rewritten = rtkRewriteCommand(event.input.command);
-    if (!rewritten) return;
-
-    event.input.command = rewritten;
+  const tool = createBashTool(process.cwd(), {
+    spawnHook: ({ command, cwd, env }) => ({
+      command: rtkRewriteCommand(command) ?? command,
+      cwd,
+      env,
+    }),
   });
 
-  pi.on("input", (event) => {
-    if (event.source === "extension") return { action: "continue" };
-
-    const rewrittenText = rewriteWholeLineBashInput(event.text);
-    if (!rewrittenText) return { action: "continue" };
-
-    return {
-      action: "transform",
-      text: rewrittenText,
-      images: event.images,
-    };
+  pi.registerTool({
+    ...tool,
+    name: "bash_rtk",
+    label: "Bash RTK",
+    description: "Execute a bash command, first attempting to rewrite it through rtk for token savings. Falls back to the original command if no rewrite is available.",
+    promptSnippet: "Execute a bash command, attempting an rtk rewrite first. Same parameters as bash.",
+    promptGuidelines: [
+      "Use bash_rtk when you want shell execution with optional rtk rewriting.",
+      "Parameters match bash: command string and optional timeout in seconds.",
+    ],
   });
 }

@@ -1,49 +1,44 @@
 # pi-ez-rtk
 
-`pi-ez-rtk` is a small Pi package that rewrites bash commands through `rtk rewrite` **without** overriding Pi's built-in `bash` tool.
+`pi-ez-rtk` adds a `bash_rtk` Pi tool.
 
-This makes it easier to compose with packages like `pi-ez-worktree` that already own bash execution for cwd routing.
+`bash_rtk` behaves like Pi's normal `bash` tool, but first tries:
 
-## What it does
+```bash
+rtk rewrite <command>
+```
 
-- rewrites agent `bash` tool calls via the `tool_call` event
-- rewrites user whole-line `!cmd` shell input via the `input` event
-- leaves `!!cmd` untouched
-- falls back silently when `rtk` is missing, times out, or cannot rewrite the command
+If RTK returns a rewrite, the rewritten command is executed. Otherwise the original command runs unchanged.
 
-## Why this exists
+## Why this shape
 
-The original `pi-rtk` package overrides the `bash` tool. That conflicts with other extensions that also need to override `bash`, such as worktree-routing packages.
+This package adds a new tool instead of overriding `bash`.
 
-`pi-ez-rtk` takes a middleware-style approach instead:
-
-- command rewriting belongs here
-- actual bash execution stays owned by whatever package or built-in tool already handles it
-
-## Prerequisites
-
-- `rtk` installed and available on your `PATH`
-- Pi package/runtime support for extensions written in TypeScript
+That makes it easier to use alongside packages like `pi-ez-worktree` that already own `bash` for cwd routing, while still giving an explicit RTK-enabled shell tool in sessions where custom tools are exposed.
 
 ## Install
+
+```bash
+pi install git:github.com/kylehild/pi-ez-rtk
+```
+
+Or local path:
 
 ```bash
 pi install /Users/kylehild/pi-packages/pi-ez-rtk
 ```
 
-Or try it for one run:
+## Usage
 
-```bash
-pi -e /Users/kylehild/pi-packages/pi-ez-rtk
-```
+Ask Pi to use the `bash_rtk` tool explicitly.
 
-## Works well with
+Examples:
 
-- `pi-ez-worktree`
-- plain built-in Pi bash behavior
+- "Run `git status` with `bash_rtk`"
+- "Use `bash_rtk` to run `ls -al`"
 
 ## Notes
 
-- For agent tool calls, `pi-ez-rtk` mutates the `bash` tool input before execution.
-- For user shell input, `pi-ez-rtk` transforms raw `!cmd` input before normal Pi processing continues.
-- It does not know anything about worktrees or any other extension explicitly.
+- `bash_rtk` takes the same parameters as `bash`: `command` and optional `timeout`.
+- If `rtk rewrite` returns a supported rewrite, that rewritten command runs.
+- If RTK has no rewrite or fails, the original command runs unchanged.

@@ -30,11 +30,12 @@ export default function (pi) {
     ...tool,
     name: "bash_rtk",
     label: "Bash RTK",
-    description: "Execute a bash command, first attempting to rewrite it through rtk for token savings. Falls back to the original command if no rewrite is available.",
-    promptSnippet: "Execute a bash command, attempting an rtk rewrite first. Same parameters as bash.",
+    description: "Execute a bash command, preferring an rtk rewrite for token savings. Falls back to the original command if no rewrite is available.",
+    promptSnippet: "Preferred shell execution tool: runs bash commands with an rtk rewrite when available. Same parameters as bash.",
     promptGuidelines: [
-      "Use bash_rtk when you want shell execution with optional rtk rewriting.",
-      "Parameters match bash: command string and optional timeout in seconds.",
+      "Prefer bash_rtk over bash for normal shell commands when this tool is available.",
+      "Use plain bash only when you specifically need behavior that should bypass rtk rewriting.",
+      "Parameters match bash exactly: command string and optional timeout in seconds.",
     ],
   });
 }

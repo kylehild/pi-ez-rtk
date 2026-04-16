@@ -4,7 +4,22 @@
   "description": "Pi extension that rewrites bash commands through rtk without overriding the bash tool.",
   "type": "module",
   "keywords": ["pi-package", "pi", "rtk", "bash"],
+  "author": "Kyle Hildebrandt",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kylehild/pi-ez-rtk.git"
+  },
+  "homepage": "https://github.com/kylehild/pi-ez-rtk#readme",
+  "bugs": {
+    "url": "https://github.com/kylehild/pi-ez-rtk/issues"
+  },
+  "files": [
+    "index.js",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "peerDependencies": {
     "@mariozechner/pi-coding-agent": "*"
   },

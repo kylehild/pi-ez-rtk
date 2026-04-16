@@ -1,18 +1,23 @@
 import { isToolCallEventType } from "@mariozechner/pi-coding-agent";
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const REWRITE_TIMEOUT_MS = 5000;
+const RTK_REWRITE_FOUND_CODES = new Set([0, 3]);
 
 function rtkRewriteCommand(command) {
-  try {
-    const rewritten = execFileSync("rtk", ["rewrite", command], {
-      encoding: "utf-8",
-      timeout: REWRITE_TIMEOUT_MS,
-    }).trimEnd();
-    return rewritten || undefined;
-  } catch {
+  const result = spawnSync("rtk", ["rewrite", command], {
+    encoding: "utf-8",
+    timeout: REWRITE_TIMEOUT_MS,
+  });
+
+  if (result.error) return undefined;
+
+  const rewritten = (result.stdout ?? "").trimEnd();
+  if (!RTK_REWRITE_FOUND_CODES.has(result.status) || !rewritten) {
     return undefined;
   }
+
+  return rewritten;
 }
 
 function rewriteWholeLineBashInput(text) {

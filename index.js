@@ -1,4 +1,5 @@
 import { createBashTool } from "@mariozechner/pi-coding-agent";
+import { Text } from "@mariozechner/pi-tui";
 import { spawnSync } from "node:child_process";
 
 const REWRITE_TIMEOUT_MS = 5000;
@@ -37,5 +38,22 @@ export default function (pi) {
       "Use plain bash only when you specifically need behavior that should bypass rtk rewriting.",
       "Parameters match bash exactly: command string and optional timeout in seconds.",
     ],
+    renderCall(args, theme) {
+      const rewritten = rtkRewriteCommand(args.command);
+
+      let text = theme.fg("toolTitle", theme.bold("bash_rtk "));
+      if (rewritten && rewritten !== args.command) {
+        text += theme.fg("dim", args.command);
+        text += theme.fg("muted", " -> ");
+        text += theme.fg("accent", rewritten);
+      } else {
+        text += theme.fg("accent", args.command);
+      }
+      if (args.timeout) {
+        text += theme.fg("dim", ` (timeout: ${args.timeout}s)`);
+      }
+
+      return new Text(text, 0, 0);
+    },
   });
 }
